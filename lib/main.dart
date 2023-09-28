@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(primarySwatch: Colors.blue, fontFamily: 'Satoshi'),
-      home: const MyHomePage(title: 'Fish recognizer app'),
+      home: const MyHomePage(title: 'Fish recognizer'),
     );
   }
 }
@@ -58,9 +58,7 @@ class _MyHomePageState extends State<MyHomePage> {
       return;
     }
 
-    setState(() {
-      _image = File(image.path);
-    });
+    _image = File(image.path);
     _classsifyImage(image);
   }
 
@@ -75,8 +73,15 @@ class _MyHomePageState extends State<MyHomePage> {
 
     setState(() {
       _output = output ?? [];
-      fishName = _output.isNotEmpty ? '${_output[0]['label']}'.replaceAll(RegExp(r'[0-9]'), '').trim() : '';
-      fishDescription = FishBreeds.getFishDescription(fishName);
+      double confidence = _output[0]['confidence'] ?? 0;
+      // print('Confidence: ${confidence}');
+      if (confidence < 0.7) {
+        fishName = 'Sorry we can\'t recognize the fish.';
+        fishDescription = '';
+      } else {
+        fishName = _output.isNotEmpty ? '${_output[0]['label']}'.replaceAll(RegExp(r'[0-9]'), '').trim() : '';
+        fishDescription = FishBreeds.getFishDescription(fishName);
+      }
     });
   }
 
@@ -101,7 +106,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               const SizedBox(height: 30),
               if (_image != null) ...[
-                Container(
+                SizedBox(
                   height: 500,
                   width: MediaQuery.of(context).size.width - 200,
                   child: Image.file(_image!),
@@ -124,7 +129,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 Text(
                   fishDescription,
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.headline6,
+                  style: TextStyle(color: AppColors.textGray, fontSize: 18),
                 ),
                 const SizedBox(height: 70),
               ],
